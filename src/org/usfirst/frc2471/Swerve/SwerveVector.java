@@ -15,6 +15,7 @@ public class SwerveVector {
     private double Px, Py;
     private double hyp, xPivot = 0.0, yPivot = 0;
     private double desiredPower = 0;
+    private double desiredAngle = 0;
     private double handsOffAngle = 0;
     
     public SwerveVector(SwerveModule _swerve, double xPosition, double yPosition, double _handsOffAngle) {
@@ -46,9 +47,10 @@ public class SwerveVector {
         vecY = y + Ry(cappedTurn);
         // Convert vecX and vecY to polar coords
         double angle, magnitude;
-        angle = MathUtils.atan2(-vecX, vecY);  // we want 0 degrees to be in the Positive Y direction, which is towards the front of the robot
-        swerve.setTwist(angle);
+        desiredAngle = MathUtils.atan2(-vecX, vecY);  // we want 0 degrees to be in the Positive Y direction, which is towards the front of the robot
         desiredPower = Math.sqrt(vecX*vecX+vecY*vecY);
+        FindNearestAngle( swerve.getTwist() );
+        swerve.setTwist(desiredAngle21);
         return desiredPower;
     }
     public void SetMaxPower( double maxPower )
@@ -60,5 +62,31 @@ public class SwerveVector {
     {
         swerve.setTwist( handsOffAngle );
         swerve.setSpeed(0.0);
+    }
+    
+    void FindNearestAngle( double currentAngle )
+    {
+        double delta = desiredAngle - currentAngle;
+        if (delta>Math.PI)
+        {
+            delta = delta - 2*Math.PI;
+        }
+        else if (delta<-Math.PI)
+        {
+            delta = delta + 2*Math.PI;
+        }
+        
+        if (delta>Math.PI/2)
+        {
+            delta = delta - Math.PI;
+            desiredAngle = currentAngle + delta;
+            desiredPower = -desiredPower;
+        }
+        else if (delta<-Math.PI/2)
+        {
+            delta = delta + Math.PI;
+            desiredAngle = currentAngle + delta;
+            desiredPower = -desiredPower;
+        }
     }
 }
