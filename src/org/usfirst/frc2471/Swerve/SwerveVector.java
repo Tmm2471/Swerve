@@ -13,7 +13,7 @@ import com.sun.squawk.util.MathUtils;
 public class SwerveVector {
     private SwerveModule swerve;
     private double Px, Py;
-    private double hyp, xOffset = 0.0, yOffset = -25;
+    private double hyp, xPivot = 0.0, yPivot = 0;
     private double desiredPower = 0;
     private double handsOffAngle = 0;
     
@@ -21,23 +21,23 @@ public class SwerveVector {
         swerve = _swerve;
         Px = xPosition;
         Py = yPosition;
-        hyp = Math.sqrt((Px+xOffset)*(Px+xOffset) + (Py+yOffset)*(Py+yOffset));
+        hyp = Math.sqrt((Px+xPivot)*(Px+xPivot) + (Py+yPivot)*(Py+yPivot));
         handsOffAngle = _handsOffAngle;
     }
     
     double Rx(double rotation) {
-        return (rotation * (Py + yOffset) / hyp);
+        return (rotation * (Py + yPivot) / hyp);
     }
     double Ry(double rotation) {
-        return (rotation * -(Px + xOffset) / hyp);
+        return (rotation * -(Px + xPivot) / hyp);
     }
     public void setXOffset(double newX) {
-        xOffset = newX;
-        hyp = Math.sqrt((Px+xOffset)*(Px+xOffset) + (Py+yOffset)*(Py+yOffset));
+        xPivot = newX;
+        hyp = Math.sqrt((Px+xPivot)*(Px+xPivot) + (Py+yPivot)*(Py+yPivot));
     }
     public void setYOffset(double newY) {
-        yOffset = newY;
-        hyp = Math.sqrt((Px+xOffset)*(Px+xOffset) + (Py+yOffset)*(Py+yOffset));
+        yPivot = newY;
+        hyp = Math.sqrt((Px+xPivot)*(Px+xPivot) + (Py+yPivot)*(Py+yPivot));
     }
     public double drive(double x, double y, double r) {
         double vecX, vecY;
