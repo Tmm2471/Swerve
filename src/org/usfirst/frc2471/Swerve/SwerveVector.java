@@ -50,8 +50,8 @@ public class SwerveVector {
         desiredAngle = MathUtils.atan2(-vecX, vecY);  // we want 0 degrees to be in the Positive Y direction, which is towards the front of the robot
         desiredPower = Math.sqrt(vecX*vecX+vecY*vecY);
         FindNearestAngle( swerve.getTwist() );
-        swerve.setTwist(desiredAngle21);
-        return desiredPower;
+        swerve.setTwist(desiredAngle);
+        return Math.abs(desiredPower);
     }
     public void SetMaxPower( double maxPower )
     {
