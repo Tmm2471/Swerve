@@ -27,10 +27,10 @@ public class SwerveDrive extends Subsystem  {
         rfVect= new SwerveVector(RobotMap.rightFrontSwerve, 16.0,11.0, -Math.PI/4.0);  
     }
     
-    public void drive(double x, double y, double r) {
+    public void drive(double x, double y, double r, double gyroAngle, double accelX, double accelY) {
         double magnitude = Math.sqrt( x*x + y*y );
 
-        if (magnitude<0.1 && Math.abs(r) < 0.1) {
+        if (magnitude<0.1 && Math.abs(r) < 0.05) {
             lrVect.HandsOff();
             lfVect.HandsOff();
             rrVect.HandsOff();
@@ -38,10 +38,10 @@ public class SwerveDrive extends Subsystem  {
             return;
         }
 
-        double lrPower = lrVect.drive(x, y, r);
-        double lfPower = lfVect.drive(x, y, r);
-        double rrPower = rrVect.drive(x, y, r);
-        double rfPower = rfVect.drive(x, y, r);
+        double lrPower = lrVect.drive(x, y, r, gyroAngle, accelX, accelY);
+        double lfPower = lfVect.drive(x, y, r, gyroAngle, accelX, accelY);
+        double rrPower = rrVect.drive(x, y, r, gyroAngle, accelX, accelY);
+        double rfPower = rfVect.drive(x, y, r, gyroAngle, accelX, accelY);
         
         double maxPower = Math.max( 1.0, Math.max( lrPower, Math.max( lfPower, Math.max( rrPower, rfPower) ) ) );
         

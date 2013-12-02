@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.command.Command;
 import org.usfirst.frc2471.Swerve.Robot;
 import com.sun.squawk.util.MathUtils;
+import edu.wpi.first.wpilibj.ADXL345_I2C;
 import org.usfirst.frc2471.Swerve.RobotMap;
 /**
  *
@@ -33,66 +34,18 @@ public class  DriveLoop extends Command {
         double x =  Robot.oi.getJoystick1().getAxis(Joystick.AxisType.kX);
         double y = -Robot.oi.getJoystick1().getAxis(Joystick.AxisType.kY);  // odd, but up is negative
         double z =  Robot.oi.getJoystick1().getAxis(Joystick.AxisType.kZ);
-
-        RobotMap.swerve.drive(x,y,z);
-
-//        double twist = Robot.oi.getJoystick1().getAxis(Joystick.AxisType.kTwist);
-//        double throttle =  Robot.oi.getJoystick1().getAxis(Joystick.AxisType.kThrottle);
-//        double numAxis =  Robot.oi.getJoystick1().getAxis(Joystick.AxisType.kNumAxis);
+        double gyroAngle = RobotMap.gyro.getAngle();
+        double accelX = RobotMap.accel.getAcceleration(ADXL345_I2C.Axes.kX);
+        double accelY = RobotMap.accel.getAcceleration(ADXL345_I2C.Axes.kY);
+        double accelZ = RobotMap.accel.getAcceleration(ADXL345_I2C.Axes.kZ);
         
-        //System.out.println("X="+x+" Y="+y+" Z="+z+" Twist="+twist+" Throttle="+throttle+" NumAxis="+numAxis);
-        
+        RobotMap.swerve.drive(x,y,z,gyroAngle,accelX,accelY);
 
-/*        
-        double power;
-        
-        if (Robot.oi.getJoystick1().getButton(Joystick.ButtonType.kTop))
-        {
-            // carlo mode
-            
-            power = -magnitude;
-
-            double delta = Robot.swerveModule.getTwist() - heading;
-            if (delta > Math.PI) {
-                delta = delta - 2.0*Math.PI;
-            }
-            else if (delta < -Math.PI) {
-                delta = delta + 2.0*Math.PI;
-            }
-
-            if (delta>Math.PI/2.0)
-            {
-                delta = delta - Math.PI;
-                power = -power;
-            }
-            else if (delta<-Math.PI/2.0)
-            {
-                delta = delta + Math.PI;
-                power = -power;
-            }
-
-            heading = Robot.swerveModule.getTwist() - delta;
-            if (heading > Math.PI)
-                heading = heading - 2.0*Math.PI;
-            else if (heading < -Math.PI)
-                heading = heading + 2.0*Math.PI;
-        }
-        else
-            power = -throttle;
-*/
-//        System.out.println("Heading: " + heading + " (x,y): (" + x + "," + y +")" );
-        
-
-        
-    System.out.println("RF: " + RobotMap.rightFrontSwerve.getTwist() );
-    System.out.println("LF: " + RobotMap.leftFrontSwerve.getTwist() );
-    System.out.println("RR: " + RobotMap.rightRearSwerve.getTwist() );
-    System.out.println("LR: " + RobotMap.leftRearSwerve.getTwist() );
-
-//        RoLbot.swerveModule.setTwist(heading);
-//        Robot.swerveModule.setSpeed(power);
-        
-        //System.out.println("Twist="+Robot.swerveModule.getTwist());
+System.out.println( "AccelX: " + accelX + " AccelY: " + accelY + " AccelZ: " + accelZ);
+//        System.out.println("RF: " + RobotMap.rightFrontSwerve.getTwist() );
+//        System.out.println("LF: " + RobotMap.leftFrontSwerve.getTwist() );
+//        System.out.println("RR: " + RobotMap.rightRearSwerve.getTwist() );
+//        System.out.println("LR: " + RobotMap.leftRearSwerve.getTwist() );
     }
     // Make this return true when this Command no longer needs to run execute()
     protected boolean isFinished() {

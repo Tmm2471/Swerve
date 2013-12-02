@@ -66,7 +66,7 @@ public class Robot extends IterativeRobot {
         if (autonomousCommand != null) autonomousCommand.cancel();
         RobotMap.leftRearTwistEnc.setDistancePerPulse(Math.PI * 2.0 / 1250.0);
         RobotMap.leftRearTwistEnc.start();
- 
+        RobotMap.gyro.reset();
     }
     /**
      * This function is called periodically during operator control
