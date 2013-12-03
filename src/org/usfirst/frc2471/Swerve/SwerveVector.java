@@ -68,17 +68,17 @@ public class SwerveVector {
             return r*Math.cos(theta);
         }
 
-        public void AddDegrees( double degrees ){
-            theta = theta + degrees * Math.PI/180.0;
+        public void AddAngle( double angle ){
+            theta = theta + angle;
         }
     }
 
-    public double drive(double x, double y, double r, double gyroAngle, double accelX, double accelY)
+    public double drive(double x, double y, double turnPower, double gyroAngle, double accelX, double accelY)
     {
-        double reducedTurn = r * 0.7;  // diminish turning, it was too fast
+        double reducedTurn = turnPower * 0.7;  // diminish turning, it was too fast
         
         Polar polar = new Polar(x,y);   // convert strafe to polar
-        polar.AddDegrees( gyroAngle );  // add to convert the strafe request from field to robot space
+        polar.AddAngle( gyroAngle );  // add to convert the strafe request from field to robot space
 
         double vecX = polar.GetX() + Rx(reducedTurn);  // combine strafing with turning via vector addition
         double vecY = polar.GetY() + Ry(reducedTurn);

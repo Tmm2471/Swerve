@@ -34,18 +34,15 @@ public class  DriveLoop extends Command {
         double x =  Robot.oi.getJoystick1().getAxis(Joystick.AxisType.kX);
         double y = -Robot.oi.getJoystick1().getAxis(Joystick.AxisType.kY);  // odd, but up is negative
         double z =  Robot.oi.getJoystick1().getAxis(Joystick.AxisType.kZ);
-        double gyroAngle = RobotMap.gyro.getAngle();
+        double w =  Robot.oi.getJoystick1().getAxis(Joystick.AxisType.kTwist);  // could it be kThrottle?
+        double gyroAngle = RobotMap.gyro.getAngle() * (Math.PI/180.0);
         double accelX = RobotMap.accel.getAcceleration(ADXL345_I2C.Axes.kX);
         double accelY = RobotMap.accel.getAcceleration(ADXL345_I2C.Axes.kY);
         double accelZ = RobotMap.accel.getAcceleration(ADXL345_I2C.Axes.kZ);
         
-        RobotMap.swerve.drive(x,y,z,gyroAngle,accelX,accelY);
+        RobotMap.swerve.drive(x,y,z,w,gyroAngle,accelX,accelY);
 
 System.out.println( "AccelX: " + accelX + " AccelY: " + accelY + " AccelZ: " + accelZ);
-//        System.out.println("RF: " + RobotMap.rightFrontSwerve.getTwist() );
-//        System.out.println("LF: " + RobotMap.leftFrontSwerve.getTwist() );
-//        System.out.println("RR: " + RobotMap.rightRearSwerve.getTwist() );
-//        System.out.println("LR: " + RobotMap.leftRearSwerve.getTwist() );
     }
     // Make this return true when this Command no longer needs to run execute()
     protected boolean isFinished() {
