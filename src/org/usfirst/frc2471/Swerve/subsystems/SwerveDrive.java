@@ -22,15 +22,16 @@ public class SwerveDrive extends PIDSubsystem  {
     SwerveVector rfVect, lfVect, rrVect, lrVect;
     double turnPower;
     double saveGyroAngle;
+    double accelerometerAngle;
     double turnJoystickAngle;
     
     public SwerveDrive() {
-        super("Steering Controller", -0.4, -0.0, -0.0);
+        super("Steering Controller", -0.65, -0.0, -0.2);
         setInputRange( -Math.PI, Math.PI );
         getPIDController().setContinuous( true );
         setAbsoluteTolerance( Math.PI/180.0*5.0 );
         getPIDController().setOutputRange(-1.0, 1.0);
-        //enable();
+        enable();
         
         lrVect= new SwerveVector(RobotMap.leftRearSwerve, -16.0,-11.0, -Math.PI/4.0); 
         lfVect= new SwerveVector(RobotMap.leftFrontSwerve, -16.0,11.0, Math.PI/4.0);  
@@ -40,6 +41,7 @@ public class SwerveDrive extends PIDSubsystem  {
     
     public void drive(double x, double y, double r, double s, double gyroAngle, double accelX, double accelY) {
         saveGyroAngle = gyroAngle;
+        accelerometerAngle = MathUtils.atan2(-accelX, accelY);
         
         double magnitude = Math.sqrt( x*x + y*y );
         double turnMag = Math.sqrt( r*r + s*s );
@@ -54,14 +56,14 @@ public class SwerveDrive extends PIDSubsystem  {
         }
         else
         {
-            turnJoystickAngle = MathUtils.atan2( -r, s );  // convert the right stick to a goal angle for robot orientation
+            turnJoystickAngle = MathUtils.atan2( -r, -s );  // convert the right stick to a goal angle for robot orientation
             setSetpoint( turnJoystickAngle );
-            //enable();
-System.out.println( "s: " + s );  // this is wrong. Is 's' valid joystick vertical??
-//System.out.println( "setPoint: " + turnJoystickAngle );  // this is wrong. Is 's' valid joystick vertical??
+            //setSetpoint( 0.0 );
+            enable(); // this is wrong. Is 's' valid joystick vertical??
+//            System.out.println( "setPoint: " + turnJoystickAngle );  // this is wrong. Is 's' valid joystick vertical??
         }
-        
-        turnPower = r;
+
+        //turnPower = r;
         
         double lrPower = lrVect.drive(x, y, turnPower, gyroAngle, accelX, accelY);
         double lfPower = lfVect.drive(x, y, turnPower, gyroAngle, accelX, accelY);
@@ -82,6 +84,7 @@ System.out.println( "s: " + s );  // this is wrong. Is 's' valid joystick vertic
     
     protected double returnPIDInput() {
         return saveGyroAngle;
+        //return accelerometerAngle;
     }
     
     protected void usePIDOutput(double output) {
