@@ -73,7 +73,7 @@ public class SwerveVector {
         }
     }
 
-    public double drive(double x, double y, double turnPower, double gyroAngle, double accelX, double accelY)
+    public double drive(double x, double y, double turnPower, double gyroAngle)
     {
         double reducedTurn = turnPower * 0.7;  // diminish turning, it was too fast
         

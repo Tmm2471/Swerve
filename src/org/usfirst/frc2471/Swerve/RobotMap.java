@@ -39,7 +39,6 @@ public class RobotMap {
         
         // **************************** LF ************************
         leftFrontTwist = new Talon(1,3);
-	LiveWindow.addActuator("SwerveModule", "Twist", (Talon) leftFrontTwist);
         leftFrontTwistEnc = new Encoder(1,8, 1,7, 1,9);
         leftFrontTwistEnc.setDistancePerPulse(Math.PI * 2.0 / 1250.0);
         leftFrontTwistEnc.start();
@@ -51,45 +50,40 @@ public class RobotMap {
         
         // **************************** LR ************************
         leftRearTwist = new Talon(1,1);
-	LiveWindow.addActuator("SwerveModule", "Twist", (Talon) leftFrontTwist);
         leftRearTwistEnc = new Encoder(1,2, 1,1, 1,3);
         leftRearTwistEnc.setDistancePerPulse(Math.PI * 2.0 / 1250.0);
         leftRearTwistEnc.start();
         //int aSlot, int aChannel, int bSlot, int bChannel, int indexSlot, int indexChannel
         //leftRearSpeedEnc = new Encoder(1,11, 1,10);
         leftRearSpeed = new Talon(1,2);
-	LiveWindow.addActuator("SwerveModule", "Speed", (Talon) leftFrontSpeed);
         leftRearSwerve = new SwerveModule("LR", leftRearSpeed, leftRearSpeedEnc, leftRearTwist, leftRearTwistEnc ); //SpeedController _speedController, Encoder _speedEnc, SpeedController _twistController, Encoder _twistEnc
         leftRearSwerve.setTwistOffset(0.18472 + 3.0*Math.PI/4.0 + 0.0471);  // -2.1715
         
         // **************************** RF ************************
         rightFrontTwist = new Talon(2,3);
-	LiveWindow.addActuator("SwerveModule", "Twist", (Talon) leftFrontTwist);
         rightFrontTwistEnc = new Encoder(new DigitalInput(2,11), new DigitalInput(2,10), new DigitalInput(2,12));
         rightFrontTwistEnc.setDistancePerPulse(Math.PI * 2.0 / 1250.0);
         rightFrontTwistEnc.start();
         //int aSlot, int aChannel, int bSlot, int bChannel, int indexSlot, int indexChannel
         //rightFrontSpeedEnc = new Encoder(2,8, 2,7);
         rightFrontSpeed = new Talon(2,4);
-	LiveWindow.addActuator("SwerveModule", "Speed", (Talon) leftFrontSpeed);
         rightFrontSwerve = new SwerveModule("RF", rightFrontSpeed, rightFrontSpeedEnc, rightFrontTwist, rightFrontTwistEnc ); //SpeedController _speedController, Encoder _speedEnc, SpeedController _twistController, Encoder _twistEnc
         rightFrontSwerve.setTwistOffset(0.28902 + 3.0*Math.PI/4.0 + 0.096);  // -2.0672
         
         // **************************** RR ************************
         rightRearTwist = new Talon(2,1);
-	LiveWindow.addActuator("SwerveModule", "Twist", (Talon) leftFrontTwist);
         rightRearTwistEnc = new Encoder(new DigitalInput(2,2),new DigitalInput(2,3),new DigitalInput(2,1));
         rightRearTwistEnc.setDistancePerPulse(Math.PI * 2.0 / 1250.0);
         rightRearTwistEnc.start();
         //int aSlot, int aChannel, int bSlot, int bChannel, int indexSlot, int indexChannel
         //rightRearSpeedEnc = new Encoder(2,5, 2,6);
         rightRearSpeed = new Talon(2,2);
-	LiveWindow.addActuator("SwerveModule", "Speed", (Talon) leftFrontSpeed);
         rightRearSwerve = new SwerveModule("RR", rightRearSpeed, rightRearSpeedEnc, rightRearTwist, rightRearTwistEnc ); //SpeedController _speedController, Encoder _speedEnc, SpeedController _twistController, Encoder _twistEnc
         rightRearSwerve.setTwistOffset(0.54412 + Math.PI/4.0 - .1309);  // 2.9003
         
         // ********************************************************
         swerve = new SwerveDrive();
+        LiveWindow.addActuator("Steering Controller", "Steer", swerve.getPIDController());
         
         gyro = new Gyro( 1 );
         gyro.reset();

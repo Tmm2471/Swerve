@@ -8,12 +8,12 @@
 // update. Deleting the comments indicating the section will prevent
 // it from being updated in th future.
 package org.usfirst.frc2471.Swerve;
-import edu.wpi.first.wpilibj.ADXL345_I2C;
 import edu.wpi.first.wpilibj.IterativeRobot;
-import edu.wpi.first.wpilibj.Joystick; 
+import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.usfirst.frc2471.Swerve.commands.*;
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -70,6 +70,13 @@ public class Robot extends IterativeRobot {
         RobotMap.leftRearTwistEnc.setDistancePerPulse(Math.PI * 2.0 / 1250.0);
         RobotMap.leftRearTwistEnc.start();
         RobotMap.gyro.reset();
+    }
+    
+    public void disabledInit() {
+        Preferences prefs = Preferences.getInstance();
+        prefs.putDouble("SteerP", RobotMap.swerve.getPIDController().getP());
+        prefs.putDouble("SteerI", RobotMap.swerve.getPIDController().getI());
+        prefs.putDouble("SteerD", RobotMap.swerve.getPIDController().getD());
     }
     /**
      * This function is called periodically during operator control

@@ -9,7 +9,9 @@
 // it from being updated in th future.
 package org.usfirst.frc2471.Swerve.subsystems;
 import com.sun.squawk.util.MathUtils;
+import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.command.PIDSubsystem;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.usfirst.frc2471.Swerve.*;
 import org.usfirst.frc2471.Swerve.RobotMap;
 import org.usfirst.frc2471.Swerve.commands.*;
@@ -26,7 +28,12 @@ public class SwerveDrive extends PIDSubsystem  {
     double turnJoystickAngle;
     
     public SwerveDrive() {
-        super("Steering Controller", -0.65, -0.0, -0.2);
+        super("steer PID", -0.65, -0.0, -0.2);
+        Preferences prefs = Preferences.getInstance();
+        double steerP = prefs.getDouble("SteerP", -0.65);
+        double steerI = prefs.getDouble("SteerI", -0.0);
+        double steerD = prefs.getDouble("SteerD", -0.2);
+        getPIDController().setPID(steerP, steerI, steerD);
         setInputRange( -Math.PI, Math.PI );
         getPIDController().setContinuous( true );
         setAbsoluteTolerance( Math.PI/180.0*5.0 );
@@ -39,7 +46,9 @@ public class SwerveDrive extends PIDSubsystem  {
         rfVect= new SwerveVector(RobotMap.rightFrontSwerve, 16.0,11.0, -Math.PI/4.0);  
     }
     
-    public void drive(double x, double y, double r, double s, double gyroAngle, double accelX, double accelY) {
+    public void drive(double x, double y, double r, double s, double gyroAngle, double accelX, double accelY)
+    {
+        SmartDashboard.putData(this);
         saveGyroAngle = gyroAngle;
         accelerometerAngle = MathUtils.atan2(-accelX, accelY);
         
@@ -62,13 +71,13 @@ public class SwerveDrive extends PIDSubsystem  {
             enable(); // this is wrong. Is 's' valid joystick vertical??
 //            System.out.println( "setPoint: " + turnJoystickAngle );  // this is wrong. Is 's' valid joystick vertical??
         }
-
+        SmartDashboard.putNumber("joyStickAngle", turnJoystickAngle);
         //turnPower = r;
         
-        double lrPower = lrVect.drive(x, y, turnPower, gyroAngle, accelX, accelY);
-        double lfPower = lfVect.drive(x, y, turnPower, gyroAngle, accelX, accelY);
-        double rrPower = rrVect.drive(x, y, turnPower, gyroAngle, accelX, accelY);
-        double rfPower = rfVect.drive(x, y, turnPower, gyroAngle, accelX, accelY);
+        double lrPower = lrVect.drive(x, y, turnPower, gyroAngle);
+        double lfPower = lfVect.drive(x, y, turnPower, gyroAngle);
+        double rrPower = rrVect.drive(x, y, turnPower, gyroAngle);
+        double rfPower = rfVect.drive(x, y, turnPower, gyroAngle);
         
         double maxPower = Math.max( 1.0, Math.max( lrPower, Math.max( lfPower, Math.max( rrPower, rfPower) ) ) );
         
@@ -88,6 +97,9 @@ public class SwerveDrive extends PIDSubsystem  {
     }
     
     protected void usePIDOutput(double output) {
+        double error = getPIDController().getError();
+        SmartDashboard.putNumber("TurnError", error);
+
         turnPower = output;
     }
 }
