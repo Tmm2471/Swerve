@@ -13,7 +13,6 @@ import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.usfirst.frc2471.Swerve.commands.*;
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -120,16 +119,33 @@ public class Robot extends IterativeRobot {
         }
         
     }
+    
+    public void getArduEnc() {
+        byte[] inBuff = new byte[4];
+        byte[] outBuff = new byte[0];
+        long encA, encB;
+        RobotMap.arduino.transaction(outBuff, 0, inBuff, 4);
+        long value = 0;
+        for (int i = 0; i < inBuff.length; i++) {
+            value = value | ((long) inBuff[i] & 0xffL) << (8 * i);
+        }
+        encA = (long)((inBuff[0] & 0xff) << 24);
+        encA = encA | (long)((inBuff[1] & 0xff) << 16);
+        encA = encA | (long)((inBuff[2] & 0xff) << 8);
+        encA = encA | (long)((inBuff[3] & 0xff));
+        System.out.println("EncA Final: " + encA);
+    }
     /**
      * This function called periodically during test mode
      */
     public void testPeriodic() {
         LiveWindow.run();
-        getCompass();
+//        getCompass();
     }
     
     public void disabledPeriodic() {
-        getCompass();
+        getArduEnc();
+//        getCompass();
         //System.out.println("Accel: " + RobotMap.accel.getAcceleration(ADXL345_I2C.Axes.kX));
     }
 }
