@@ -9,7 +9,6 @@
 // it from being updated in th future.
 package org.usfirst.frc2471.Swerve;
 import edu.wpi.first.wpilibj.IterativeRobot;
-import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
@@ -72,7 +71,9 @@ public class Robot extends IterativeRobot {
     }
     
     public void disabledInit() {
+        System.out.println("saved");
         RobotMap.swerve.getSteerDashboardPID().save();
+        RobotMap.rightRearSwerve.getTwistDashboardPID().save();
     }
     /**
      * This function is called periodically during operator control

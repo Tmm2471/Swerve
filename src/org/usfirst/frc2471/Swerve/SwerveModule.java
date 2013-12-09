@@ -23,6 +23,7 @@ public class SwerveModule implements Runnable {
     PIDController twistController;
     double twistOffset = 0.0;
     String name;
+    static DashboardPID twistDashboardPID;
     
     public SwerveModule(String _name, SpeedController _speedController, Encoder _speedEnc, SpeedController _twistController, Encoder _twistEnc) {
         //indexEnc = new DigitalInput(3);
@@ -37,7 +38,8 @@ public class SwerveModule implements Runnable {
         
 //        System.out.println("ServeModule Constructed" + name);
         
-        twistController = new PIDController(0.4, 0.0, 0.15, new PidThing(this), new PidThing(this));
+        twistController = new PIDController(1.0, 0.0, 0.5, new PidThing(this), new PidThing(this));
+        twistDashboardPID = new DashboardPID("Twist", twistController);
         twistController.setInputRange(-Math.PI, Math.PI);
         twistController.setOutputRange(-1.0, 1.0);
         twistController.setContinuous(true);
@@ -47,6 +49,9 @@ public class SwerveModule implements Runnable {
         t.start();
     }
     
+    public DashboardPID getTwistDashboardPID() {
+        return twistDashboardPID;
+    }
     
     public void setTwistOffset(double newVal) {
         twistOffset = newVal;
@@ -75,6 +80,7 @@ public class SwerveModule implements Runnable {
     public void setTwist(double twist) {
        //System.out.println("SM twist: " + twist);
        twistController.setSetpoint(twist);
+       twistDashboardPID.update();
     }
 
     /**

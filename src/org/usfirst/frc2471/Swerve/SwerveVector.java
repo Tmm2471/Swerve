@@ -26,6 +26,10 @@ public class SwerveVector {
         handsOffAngle = _handsOffAngle;
     }
     
+    public SwerveModule getSwerveModule() {
+        return swerve;
+    }
+    
     double Rx(double rotation) {
         return (rotation * (Py + yPivot) / hyp);
     }
@@ -94,7 +98,7 @@ public class SwerveVector {
     }
     public void SetMaxPower( double maxPower )
     {
-        swerve.setSpeed( desiredPower / maxPower );
+        //swerve.setSpeed( desiredPower / maxPower );
     }
     
     public void HandsOff()
