@@ -89,6 +89,7 @@ public class SwerveDrive extends PIDSubsystem  {
     {
         SmartDashboard.putData(this);
         saveGyroAngle = gyroAngle;
+        SmartDashboard.putNumber("gyroAngle", gyroAngle);
         
         if (Math.abs(accelX)>0.1 || Math.abs(accelY)>0.1) { 
             double temp = MathUtils.atan2(-accelX, accelY);
@@ -111,11 +112,11 @@ public class SwerveDrive extends PIDSubsystem  {
         else
         {
             if (turnMag > 0.05) {
-                turnJoystickAngle = MathUtils.atan2( -r, -s );  // convert the right stick to a goal angle for robot orientation
+                turnJoystickAngle = MathUtils.atan2( -r, s );  // convert the right stick to a goal angle for robot orientation
                 setSetpoint( turnJoystickAngle );
                 SmartDashboard.putNumber("joyStickAngle", turnJoystickAngle);
                 //setSetpoint( 0.0 );
-                //enable(); // this is wrong. Is 's' valid joystick vertical??
+                //enable();
             }
         }
 

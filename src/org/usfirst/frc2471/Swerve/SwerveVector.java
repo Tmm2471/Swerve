@@ -78,7 +78,7 @@ public class SwerveVector {
         double reducedTurn = turnPower * 0.7;  // diminish turning, it was too fast
         
         Polar polar = new Polar(x,y);   // convert strafe to polar
-        polar.AddAngle( gyroAngle );  // add to convert the strafe request from field to robot space
+        polar.AddAngle( -gyroAngle );  // add to convert the strafe request from field to robot space
 
         double vecX = polar.GetX() + Rx(reducedTurn);  // combine strafing with turning via vector addition
         double vecY = polar.GetY() + Ry(reducedTurn);

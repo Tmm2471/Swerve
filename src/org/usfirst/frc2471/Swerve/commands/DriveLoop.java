@@ -34,8 +34,8 @@ public class  DriveLoop extends Command {
         double x =  Robot.oi.getJoystick1().getAxis(Joystick.AxisType.kX);
         double y = -Robot.oi.getJoystick1().getAxis(Joystick.AxisType.kY);  // odd, but up is negative
         double z =  Robot.oi.getJoystick1().getAxis(Joystick.AxisType.kZ);
-        double w =  Robot.oi.getJoystick1().getAxis(Joystick.AxisType.kThrottle);  // could it be kThrottle?
-        double gyroAngle = RobotMap.gyro.getAngle() * (Math.PI/-180.0);
+        double w = -Robot.oi.getJoystick1().getAxis(Joystick.AxisType.kThrottle);  // kThrottle is the y of the right stick
+        double gyroAngle = -RobotMap.gyro.getAngle() * (Math.PI/180.0);
         double accelX = RobotMap.accel.getAcceleration(ADXL345_I2C.Axes.kX);
         double accelY = RobotMap.accel.getAcceleration(ADXL345_I2C.Axes.kY);
         double accelZ = RobotMap.accel.getAcceleration(ADXL345_I2C.Axes.kZ);
