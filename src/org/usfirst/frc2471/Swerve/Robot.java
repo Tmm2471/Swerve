@@ -72,10 +72,7 @@ public class Robot extends IterativeRobot {
     }
     
     public void disabledInit() {
-        Preferences prefs = Preferences.getInstance();
-        prefs.putDouble("SteerP", RobotMap.swerve.getPIDController().getP());
-        prefs.putDouble("SteerI", RobotMap.swerve.getPIDController().getI());
-        prefs.putDouble("SteerD", RobotMap.swerve.getPIDController().getD());
+        RobotMap.swerve.getSteerDashboardPID().save();
     }
     /**
      * This function is called periodically during operator control

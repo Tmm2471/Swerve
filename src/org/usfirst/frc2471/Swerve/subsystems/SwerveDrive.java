@@ -9,7 +9,6 @@
 // it from being updated in th future.
 package org.usfirst.frc2471.Swerve.subsystems;
 import com.sun.squawk.util.MathUtils;
-import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.command.PIDSubsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.usfirst.frc2471.Swerve.*;
@@ -63,14 +62,16 @@ public class SwerveDrive extends PIDSubsystem  {
     double accelerometerAngle;
     double turnJoystickAngle;
     Filter accelFilter;
+    DashboardPID steerDashboardPID;
+    
+    public DashboardPID getSteerDashboardPID() {
+        return steerDashboardPID;
+    }
     
     public SwerveDrive() {
-        super("steer PID", -0.65, -0.0, -0.2);
-        Preferences prefs = Preferences.getInstance();
-        double steerP = prefs.getDouble("SteerP", -0.65);
-        double steerI = prefs.getDouble("SteerI", -0.0);
-        double steerD = prefs.getDouble("SteerD", -0.2);
-        getPIDController().setPID(steerP, steerI, steerD);
+        super("Steer PID", -1.5, -0.0, -6.0);
+        steerDashboardPID = new DashboardPID( "Steer", getPIDController() );
+        
         setInputRange( -Math.PI, Math.PI );
         getPIDController().setContinuous( true );
         setAbsoluteTolerance( Math.PI/180.0*5.0 );
@@ -87,7 +88,8 @@ public class SwerveDrive extends PIDSubsystem  {
     
     public void drive(double x, double y, double r, double s, double gyroAngle, double accelX, double accelY)
     {
-        SmartDashboard.putData(this);
+        steerDashboardPID.update();
+        
         saveGyroAngle = gyroAngle;
         SmartDashboard.putNumber("gyroAngle", gyroAngle);
         
@@ -113,11 +115,12 @@ public class SwerveDrive extends PIDSubsystem  {
         {
             if (turnMag > 0.05) {
                 turnJoystickAngle = MathUtils.atan2( -r, s );  // convert the right stick to a goal angle for robot orientation
-                setSetpoint( turnJoystickAngle );
                 SmartDashboard.putNumber("joyStickAngle", turnJoystickAngle);
-                //setSetpoint( 0.0 );
+                setSetpoint( turnJoystickAngle );
                 enable();
             }
+            
+            //setSetpoint( 0.0 );
         }
 
         //turnPower = r;  // joystick direct turning
