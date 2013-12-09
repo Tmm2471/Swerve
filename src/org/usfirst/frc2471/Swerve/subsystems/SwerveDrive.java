@@ -75,7 +75,7 @@ public class SwerveDrive extends PIDSubsystem  {
         getPIDController().setContinuous( true );
         setAbsoluteTolerance( Math.PI/180.0*5.0 );
         getPIDController().setOutputRange(-1.0, 1.0);
-        //enable();
+        enable();
         accelerometerAngle = 0.0;
         accelFilter = new Filter(5);
         
@@ -116,11 +116,11 @@ public class SwerveDrive extends PIDSubsystem  {
                 setSetpoint( turnJoystickAngle );
                 SmartDashboard.putNumber("joyStickAngle", turnJoystickAngle);
                 //setSetpoint( 0.0 );
-                //enable();
+                enable();
             }
         }
 
-        turnPower = r;  // joystick direct turning
+        //turnPower = r;  // joystick direct turning
         
         double lrPower = lrVect.drive(x, y, turnPower, gyroAngle);
         double lfPower = lfVect.drive(x, y, turnPower, gyroAngle);
