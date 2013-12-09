@@ -98,7 +98,7 @@ public class SwerveVector {
     }
     public void SetMaxPower( double maxPower )
     {
-        //swerve.setSpeed( desiredPower / maxPower );
+        swerve.setSpeed( desiredPower / maxPower );
     }
     
     public void HandsOff()
