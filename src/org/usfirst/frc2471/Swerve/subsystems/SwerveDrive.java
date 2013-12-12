@@ -78,7 +78,7 @@ public class SwerveDrive extends PIDSubsystem  {
         getPIDController().setOutputRange(-1.0, 1.0);
         enable();
         accelerometerAngle = 0.0;
-        accelFilter = new Filter(5);
+        accelFilter = new Filter(10);
         
         lrVect= new SwerveVector(RobotMap.leftRearSwerve, -16.0,-11.0, -Math.PI/4.0); 
         lfVect= new SwerveVector(RobotMap.leftFrontSwerve, -16.0,11.0, Math.PI/4.0);  

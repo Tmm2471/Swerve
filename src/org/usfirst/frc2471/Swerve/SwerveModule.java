@@ -38,7 +38,7 @@ public class SwerveModule implements Runnable {
         
 //        System.out.println("ServeModule Constructed" + name);
         
-        twistController = new PIDController(1.0, 0.0, 0.5, new PidThing(this), new PidThing(this));
+        twistController = new PIDController(0.75, 0.0, 0.75, new PidThing(this), new PidThing(this));
         twistDashboardPID = new DashboardPID("Twist", twistController);
         twistController.setInputRange(-Math.PI, Math.PI);
         twistController.setOutputRange(-1.0, 1.0);
