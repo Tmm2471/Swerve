@@ -61,8 +61,10 @@ public class SwerveDrive extends PIDSubsystem  {
     double saveGyroAngle;
     double accelerometerAngle;
     double turnJoystickAngle;
-    Filter accelFilter;
+    Filter accelFilterX;
+    Filter accelFilterY;
     DashboardPID steerDashboardPID;
+    boolean autoSteer;
     
     public DashboardPID getSteerDashboardPID() {
         return steerDashboardPID;
@@ -78,7 +80,9 @@ public class SwerveDrive extends PIDSubsystem  {
         getPIDController().setOutputRange(-1.0, 1.0);
         enable();
         accelerometerAngle = 0.0;
-        accelFilter = new Filter(10);
+        autoSteer = false;
+        accelFilterX = new Filter(5);
+        accelFilterY = new Filter(5);
         
         lrVect= new SwerveVector(RobotMap.leftRearSwerve, -16.0,-11.0, -Math.PI/4.0); 
         lfVect= new SwerveVector(RobotMap.leftFrontSwerve, -16.0,11.0, Math.PI/4.0);  
@@ -90,20 +94,25 @@ public class SwerveDrive extends PIDSubsystem  {
     {
         steerDashboardPID.update();
         
+        autoSteer = Robot.oi.autoSteerButton.get();
         saveGyroAngle = gyroAngle;
-        SmartDashboard.putNumber("gyroAngle", gyroAngle);
+        SmartDashboard.putNumber("gyroAngle", -gyroAngle);
         
-        if (Math.abs(accelX)>0.1 || Math.abs(accelY)>0.1) { 
-            double temp = MathUtils.atan2(-accelX, accelY);
-            accelFilter.AddSample(temp);
-            accelerometerAngle = accelFilter.GetAverage();
-            SmartDashboard.putNumber("accel angle", accelerometerAngle);
+        if (Math.abs(accelX)>0.25 || Math.abs(accelY)>0.25) { 
+            accelFilterX.AddSample(accelX);
+            accelFilterY.AddSample(accelY);
+            double tempX = accelFilterX.GetAverage();
+            double tempY = accelFilterY.GetAverage();
+            accelerometerAngle = MathUtils.atan2(-tempX, tempY);
+            SmartDashboard.putNumber("accel angle", -accelerometerAngle);
+            SmartDashboard.putNumber("accel X", tempX);
+            SmartDashboard.putNumber("accel Y", tempY);
         }
         
         double magnitude = Math.sqrt( x*x + y*y );
-        double turnMag = Math.sqrt( r*r + s*s );
+        double turnMag = Math.sqrt( r*r + s*s );          
 
-        if (magnitude < 0.1 && turnMag < 0.05) {
+        if (magnitude < 0.1 && turnMag < 0.05 && !autoSteer) {
             lrVect.HandsOff();
             lfVect.HandsOff();
             rrVect.HandsOff();
@@ -115,12 +124,16 @@ public class SwerveDrive extends PIDSubsystem  {
         {
             if (turnMag > 0.05) {
                 turnJoystickAngle = MathUtils.atan2( -r, s );  // convert the right stick to a goal angle for robot orientation
-                SmartDashboard.putNumber("joyStickAngle", turnJoystickAngle);
-                setSetpoint( turnJoystickAngle );
+                SmartDashboard.putNumber("joyStickAngle", -turnJoystickAngle);
+                if (!autoSteer) {
+                    setSetpoint( turnJoystickAngle );
+                    enable();
+                }
+            }
+            if (autoSteer) {
+                setSetpoint( accelerometerAngle - gyroAngle );
                 enable();
             }
-            
-            //setSetpoint( 0.0 );
         }
 
         //turnPower = r;  // joystick direct turning
@@ -144,13 +157,11 @@ public class SwerveDrive extends PIDSubsystem  {
     
     protected double returnPIDInput() {
         return saveGyroAngle;
-        //return accelerometerAngle;
     }
     
     protected void usePIDOutput(double output) {
-        double error = getPIDController().getError();
-        SmartDashboard.putNumber("TurnError", error);
-
+        //double error = getPIDController().getError();
+        SmartDashboard.putNumber("TurnPower", output);
         turnPower = output;
     }
 }
