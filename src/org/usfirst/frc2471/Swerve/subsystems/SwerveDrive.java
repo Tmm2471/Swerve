@@ -65,6 +65,8 @@ public class SwerveDrive extends PIDSubsystem  {
     Filter accelFilterY;
     DashboardPID steerDashboardPID;
     boolean autoSteer;
+    boolean fieldSteer, fieldMove;
+    double prevX, prevY;
     
     public DashboardPID getSteerDashboardPID() {
         return steerDashboardPID;
@@ -73,6 +75,7 @@ public class SwerveDrive extends PIDSubsystem  {
     public SwerveDrive() {
         super("Steer PID", -1.5, -0.0, -6.0);
         steerDashboardPID = new DashboardPID( "Steer", getPIDController() );
+        //SmartDashboard.putData(this);  // I wish this worked, but it didn't seem to, so we rolled our own. (above)
         
         setInputRange( -Math.PI, Math.PI );
         getPIDController().setContinuous( true );
@@ -81,8 +84,12 @@ public class SwerveDrive extends PIDSubsystem  {
         enable();
         accelerometerAngle = 0.0;
         autoSteer = false;
-        accelFilterX = new Filter(5);
-        accelFilterY = new Filter(5);
+        fieldSteer = false;
+        fieldMove = true;
+        SmartDashboard.putBoolean("FieldSteer", fieldSteer);
+        SmartDashboard.putBoolean("FieldMove", fieldMove);
+        prevX = 0;
+        prevY = 0;
         
         lrVect= new SwerveVector(RobotMap.leftRearSwerve, -16.0,-11.0, -Math.PI/4.0); 
         lfVect= new SwerveVector(RobotMap.leftFrontSwerve, -16.0,11.0, Math.PI/4.0);  
@@ -93,25 +100,24 @@ public class SwerveDrive extends PIDSubsystem  {
     public void drive(double x, double y, double r, double s, double gyroAngle, double accelX, double accelY)
     {
         steerDashboardPID.update();
-        
+        fieldSteer = SmartDashboard.getBoolean("FieldSteer");
+        fieldMove = SmartDashboard.getBoolean("FieldMove");
+
         autoSteer = Robot.oi.autoSteerButton.get();
         saveGyroAngle = gyroAngle;
         SmartDashboard.putNumber("gyroAngle", -gyroAngle);
         
-        if (Math.abs(accelX)>0.25 || Math.abs(accelY)>0.25) { 
-            accelFilterX.AddSample(accelX);
-            accelFilterY.AddSample(accelY);
-            double tempX = accelFilterX.GetAverage();
-            double tempY = accelFilterY.GetAverage();
-            accelerometerAngle = MathUtils.atan2(-tempX, tempY);
+         double deltaX = x-prevX;
+         double deltaY = y-prevY;
+         if (Math.abs(deltaX)>0.05 || Math.abs(deltaY)>0.05) {
+            accelerometerAngle = MathUtils.atan2(-deltaX, deltaY);
             SmartDashboard.putNumber("accel angle", -accelerometerAngle);
-            SmartDashboard.putNumber("accel X", tempX);
-            SmartDashboard.putNumber("accel Y", tempY);
-        }
-        
+            prevX = x;
+            prevY = y;
+         }
+                 
         double magnitude = Math.sqrt( x*x + y*y );
         double turnMag = Math.sqrt( r*r + s*s );          
-
         if (magnitude < 0.1 && turnMag < 0.05 && !autoSteer) {
             lrVect.HandsOff();
             lfVect.HandsOff();
@@ -131,17 +137,27 @@ public class SwerveDrive extends PIDSubsystem  {
                 }
             }
             if (autoSteer) {
-                setSetpoint( accelerometerAngle - gyroAngle );
+                setSetpoint( accelerometerAngle );
                 enable();
             }
         }
 
-        //turnPower = r;  // joystick direct turning
+        if (!fieldSteer) {
+            turnPower = r;  // joystick direct turning
+        }
         
-        double lrPower = lrVect.drive(x, y, turnPower, gyroAngle);
-        double lfPower = lfVect.drive(x, y, turnPower, gyroAngle);
-        double rrPower = rrVect.drive(x, y, turnPower, gyroAngle);
-        double rfPower = rfVect.drive(x, y, turnPower, gyroAngle);
+        double tempGyro;
+        if (fieldMove) {
+            tempGyro = gyroAngle;
+        }
+        else {
+            tempGyro = 0;
+        }
+        
+        double lrPower = lrVect.drive(x, y, turnPower, tempGyro);
+        double lfPower = lfVect.drive(x, y, turnPower, tempGyro);
+        double rrPower = rrVect.drive(x, y, turnPower, tempGyro);
+        double rfPower = rfVect.drive(x, y, turnPower, tempGyro);
         
         double maxPower = Math.max( 1.0, Math.max( lrPower, Math.max( lfPower, Math.max( rrPower, rfPower) ) ) );
         
@@ -162,6 +178,8 @@ public class SwerveDrive extends PIDSubsystem  {
     protected void usePIDOutput(double output) {
         //double error = getPIDController().getError();
         SmartDashboard.putNumber("TurnPower", output);
-        turnPower = output;
+        if (fieldSteer) {
+            turnPower = output;
+        }
     }
 }
