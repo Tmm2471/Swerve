@@ -142,7 +142,7 @@ public class SwerveDrive extends PIDSubsystem  {
             }
         }
 
-        if (!fieldSteer) {
+        if (!fieldSteer && !autoSteer) {
             turnPower = r;  // joystick direct turning
         }
         
@@ -178,7 +178,7 @@ public class SwerveDrive extends PIDSubsystem  {
     protected void usePIDOutput(double output) {
         //double error = getPIDController().getError();
         SmartDashboard.putNumber("TurnPower", output);
-        if (fieldSteer) {
+        if (fieldSteer || autoSteer) {
             turnPower = output;
         }
     }
