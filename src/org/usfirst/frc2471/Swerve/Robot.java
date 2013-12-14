@@ -136,22 +136,6 @@ public class Robot extends IterativeRobot {
         
     }
     
-    public void getArduEnc() {
-        byte[] inBuff = new byte[8];
-        byte[] outBuff = new byte[0];
-        long encA, encB;
-        RobotMap.arduino.transaction(outBuff, 0, inBuff, 7);
-        encA = (long)((inBuff[0] & 0xff) << 24);
-        encA = encA | (long)((inBuff[1] & 0xff) << 16);
-        encA = encA | (long)((inBuff[2] & 0xff) << 8);
-        encA = encA | (long)((inBuff[3] & 0xff));
-        System.out.println("EncA: " + encA);
-        encB = (long)((inBuff[4] & 0xff) << 24);
-        encB = encB | (long)((inBuff[5] & 0xff) << 16);
-        encB = encB | (long)((inBuff[6] & 0xff) << 8);
-        encB = encB | (long)((inBuff[7] & 0xff));
-        System.out.println("EncB: " + encB);
-    }
     /**
      * This function called periodically during test mode
      */
@@ -161,8 +145,11 @@ public class Robot extends IterativeRobot {
     }
     
     public void disabledPeriodic() {
-        getArduEnc();
 //        getCompass();
         //System.out.println("Accel: " + RobotMap.accel.getAcceleration(ADXL345_I2C.Axes.kX));
+        System.out.println("leftFront: " + RobotMap.leftFrontSpeedEnc.get());
+        System.out.println("RightFront: " + RobotMap.rightFrontSpeedEnc.get());
+        System.out.println("leftRear: " + RobotMap.leftRearSpeedEnc.get());
+        System.out.println("rightRear: " + RobotMap.rightRearSpeedEnc.get());
     }
 }
