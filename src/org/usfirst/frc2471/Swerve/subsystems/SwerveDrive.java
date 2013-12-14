@@ -172,7 +172,7 @@ public class SwerveDrive extends PIDSubsystem  {
             }
         }
         
-        if (!fieldSteer && !autoSteer) {
+        if (!fieldSteer) {
             turnSpeedPID.setSetpoint(r/8.0);
             turnSpeedPID.enable();
         }
