@@ -66,7 +66,7 @@ public class SwerveDrive extends PIDSubsystem  {
     DashboardPID steerDashboardPID;
     boolean autoSteer;
     boolean fieldSteer, fieldMove;
-    double prevX, prevY;
+    double prevXVelocity, prevYVelocity;
     
     public DashboardPID getSteerDashboardPID() {
         return steerDashboardPID;
@@ -88,8 +88,8 @@ public class SwerveDrive extends PIDSubsystem  {
         fieldMove = true;
         SmartDashboard.putBoolean("FieldSteer", fieldSteer);
         SmartDashboard.putBoolean("FieldMove", fieldMove);
-        prevX = 0;
-        prevY = 0;
+        prevXVelocity = 0;
+        prevYVelocity = 0;
         
         lrVect= new SwerveVector(RobotMap.leftRearSwerve, -16.0,-11.0, -Math.PI/4.0); 
         lfVect= new SwerveVector(RobotMap.leftFrontSwerve, -16.0,11.0, Math.PI/4.0);  
@@ -176,13 +176,18 @@ public class SwerveDrive extends PIDSubsystem  {
     }
 
     private void GetAccelerationFromJoyStick(double x, double y) {
-        double deltaX = x-prevX;
-        double deltaY = y-prevY;
-        if (Math.abs(deltaX)>0.05 || Math.abs(deltaY)>0.05) {
-           accelerometerAngle = MathUtils.atan2(-deltaX, deltaY);
+        // use particle simulation to estimate acceleration from left joystick input
+        double xVelocity = prevXVelocity + x;  // update velocity with accel from joystick
+        double yVelocity = prevYVelocity + y;
+        xVelocity = xVelocity * 0.85;  // viscous drag
+        yVelocity = yVelocity * 0.85;
+        double xAccel = xVelocity - prevXVelocity;  // compute new accel
+        double yAccel = yVelocity - prevYVelocity;
+        if (Math.abs(xAccel)>0.05 || Math.abs(yAccel)>0.05) {
+           accelerometerAngle = MathUtils.atan2(-xAccel, yAccel);
            SmartDashboard.putNumber("accel angle", -accelerometerAngle);
-           prevX = x;
-           prevY = y;
         }
+        prevXVelocity = xVelocity;
+        prevYVelocity = yVelocity;
     }
 }
