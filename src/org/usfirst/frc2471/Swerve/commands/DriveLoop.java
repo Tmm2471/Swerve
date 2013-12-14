@@ -13,11 +13,14 @@ import edu.wpi.first.wpilibj.command.Command;
 import org.usfirst.frc2471.Swerve.Robot;
 import com.sun.squawk.util.MathUtils;
 import edu.wpi.first.wpilibj.ADXL345_I2C;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.usfirst.frc2471.Swerve.RobotMap;
 /**
  *
  */
 public class  DriveLoop extends Command {
+    double prevAngle = 0.0;
+    
     public DriveLoop() {
         // Use requires() here to declare subsystem dependencies
         // eg. requires(chassis);
@@ -40,7 +43,12 @@ public class  DriveLoop extends Command {
         double accelY = RobotMap.accel.getAcceleration(ADXL345_I2C.Axes.kY);
         double accelZ = RobotMap.accel.getAcceleration(ADXL345_I2C.Axes.kZ);
         
-        RobotMap.swerve.drive(x,y,z,w,gyroAngle,accelX,accelY);
+        double turnSpeed = gyroAngle - prevAngle;
+        prevAngle = gyroAngle;
+        SmartDashboard.putNumber("Turn Speed", turnSpeed);
+        boolean autoSteer = Robot.oi.autoSteerButton.get();
+        
+        RobotMap.swerve.drive(x,y,z,w,gyroAngle,accelX,accelY,autoSteer,turnSpeed);
 
 //System.out.println( "AccelX: " + accelX + " AccelY: " + accelY + " AccelZ: " + accelZ);
     }
