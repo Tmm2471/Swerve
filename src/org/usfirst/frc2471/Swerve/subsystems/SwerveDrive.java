@@ -9,6 +9,7 @@
 // it from being updated in th future.
 package org.usfirst.frc2471.Swerve.subsystems;
 import com.sun.squawk.util.MathUtils;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.command.PIDSubsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.usfirst.frc2471.Swerve.*;
@@ -67,6 +68,8 @@ public class SwerveDrive extends PIDSubsystem  {
     boolean autoSteer;
     boolean fieldSteer, fieldMove;
     double prevXVelocity, prevYVelocity;
+    boolean handsOffStarted = false;
+    double timeHandsOffStarted = 0.0;
     
     public DashboardPID getSteerDashboardPID() {
         return steerDashboardPID;
@@ -90,11 +93,13 @@ public class SwerveDrive extends PIDSubsystem  {
         SmartDashboard.putBoolean("FieldMove", fieldMove);
         prevXVelocity = 0;
         prevYVelocity = 0;
-        
+        handsOffStarted = false;
+        timeHandsOffStarted = 0.0;
+
         lrVect= new SwerveVector(RobotMap.leftRearSwerve, -16.0,-11.0, -Math.PI/4.0); 
         lfVect= new SwerveVector(RobotMap.leftFrontSwerve, -16.0,11.0, Math.PI/4.0);  
         rrVect= new SwerveVector(RobotMap.rightRearSwerve, 16.0,-11.0, Math.PI/4.0); 
-        rfVect= new SwerveVector(RobotMap.rightFrontSwerve, 16.0,11.0, -Math.PI/4.0);  
+        rfVect= new SwerveVector(RobotMap.rightFrontSwerve, 16.0,11.0, -Math.PI/4.0);
     }
     
     public void drive(double x, double y, double r, double s, double gyroAngle, double accelX, double accelY)
@@ -109,29 +114,42 @@ public class SwerveDrive extends PIDSubsystem  {
         GetAccelerationFromJoyStick(x, y);
                  
         double magnitude = Math.sqrt( x*x + y*y );
-        double turnMag = Math.sqrt( r*r + s*s );          
-        if (magnitude < 0.1 && turnMag < 0.05 && !autoSteer) {
-            lrVect.HandsOff();
-            lfVect.HandsOff();
-            rrVect.HandsOff();
-            rfVect.HandsOff();
-            disable();
-            return;
-        }
-        else
-        {
-            if (turnMag > 0.05) {
-                turnJoystickAngle = MathUtils.atan2( -r, s );  // convert the right stick to a goal angle for robot orientation
-                SmartDashboard.putNumber("joyStickAngle", -turnJoystickAngle);
-                if (!autoSteer) {
-                    setSetpoint( turnJoystickAngle );
-                    enable();
+        double turnMag = Math.sqrt( r*r + s*s );
+        
+        if (!autoSteer) {  // check for HandsOff
+            if (magnitude < 0.1 && turnMag < 0.05 ) {
+                if (!handsOffStarted) {
+                    handsOffStarted = true;
+                    timeHandsOffStarted = Timer.getFPGATimestamp();
+                }
+                else if (Timer.getFPGATimestamp()-timeHandsOffStarted > 0.75) {
+                    lrVect.HandsOff();
+                    lfVect.HandsOff();
+                    rrVect.HandsOff();
+                    rfVect.HandsOff();
+                    disable();
+                    return;
+                }
+                else {
+                    return;
                 }
             }
-            if (autoSteer) {
-                setSetpoint( accelerometerAngle );
+            else {
+                handsOffStarted = false;
+            }
+        }
+        
+        if (turnMag > 0.05 && fieldSteer) {
+            turnJoystickAngle = MathUtils.atan2( -r, s );  // convert the right stick to a goal angle for robot orientation
+            SmartDashboard.putNumber("joyStickAngle", -turnJoystickAngle);
+            if (!autoSteer) {
+                setSetpoint( turnJoystickAngle );
                 enable();
             }
+        }
+        if (autoSteer) {
+            setSetpoint( accelerometerAngle );
+            enable();
         }
 
         if (!fieldSteer && !autoSteer) {
