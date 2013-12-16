@@ -9,6 +9,9 @@
 // it from being updated in th future.
 package org.usfirst.frc2471.Swerve.subsystems;
 import com.sun.squawk.util.MathUtils;
+import edu.wpi.first.wpilibj.PIDController;
+import edu.wpi.first.wpilibj.PIDOutput;
+import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.command.PIDSubsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -64,20 +67,25 @@ public class SwerveDrive extends PIDSubsystem  {
     double turnJoystickAngle;
     Filter accelFilterX;
     Filter accelFilterY;
-    DashboardPID steerDashboardPID;
+//    DashboardPID steerDashboardPID;
     boolean autoSteer;
     boolean fieldSteer, fieldMove;
     double prevXVelocity, prevYVelocity;
     boolean handsOffStarted = false;
     double timeHandsOffStarted = 0.0;
+    PIDController turnSpeedPID;
+    double turnSpeedFeed;
+    double turnSpeedSum;
+    double turnSpeed;
+    static final double TURN_DEAD_BAND = 0.05;
     
-    public DashboardPID getSteerDashboardPID() {
-        return steerDashboardPID;
-    }
+//    public DashboardPID getSteerDashboardPID() {
+//        return steerDashboardPID;
+//    }
     
     public SwerveDrive() {
         super("Steer PID", -1.5, -0.0, -6.0);
-        steerDashboardPID = new DashboardPID( "Steer", getPIDController() );
+//        steerDashboardPID = new DashboardPID( "Steer", getPIDController() );
         //SmartDashboard.putData(this);  // I wish this worked, but it didn't seem to, so we rolled our own. (above)
         
         setInputRange( -Math.PI, Math.PI );
@@ -95,20 +103,49 @@ public class SwerveDrive extends PIDSubsystem  {
         prevYVelocity = 0;
         handsOffStarted = false;
         timeHandsOffStarted = 0.0;
+        
+        turnSpeed = 0;
+        turnSpeedPID = new PIDController(-0.05, -0.0, -0.0, new PidSourceOutput(), new PidSourceOutput());
+        turnSpeedPID.setInputRange( -6.0, 6.0 );
+        turnSpeedPID.setOutputRange(-1.0, 1.0);
+        turnSpeedPID.setAbsoluteTolerance( 0.01 );
+        turnSpeedFeed = 0.0;
+        turnSpeedSum = 0.0;
 
         lrVect= new SwerveVector(RobotMap.leftRearSwerve, -16.0,-11.0, -Math.PI/4.0); 
         lfVect= new SwerveVector(RobotMap.leftFrontSwerve, -16.0,11.0, Math.PI/4.0);  
         rrVect= new SwerveVector(RobotMap.rightRearSwerve, 16.0,-11.0, Math.PI/4.0); 
         rfVect= new SwerveVector(RobotMap.rightFrontSwerve, 16.0,11.0, -Math.PI/4.0);
     }
-    
-    public void drive(double x, double y, double r, double s, double gyroAngle, double accelX, double accelY)
-    {
-        steerDashboardPID.update();
-        fieldSteer = SmartDashboard.getBoolean("FieldSteer");
-        fieldMove = SmartDashboard.getBoolean("FieldMove");
 
-        autoSteer = Robot.oi.autoSteerButton.get();
+    class PidSourceOutput implements PIDSource, PIDOutput {
+        public PidSourceOutput() {
+        }
+        public double pidGet() {
+            return turnSpeed;
+        }
+        public void pidWrite(double out) {
+            turnSpeedSum = turnSpeedSum + out;
+            turnPower = turnSpeedFeed + turnSpeedSum;
+            if (turnPower>1) {
+                turnSpeedSum = turnSpeedSum - (turnPower-1);  // cap the turnSpeedSum too, to prevent wind up
+                turnPower = 1;
+            }
+            else if (turnPower<-1) {
+                turnSpeedSum = turnSpeedSum - (turnPower-(-1));  // cap the turnSpeedSum too
+                turnPower = -1;
+            }
+        }
+    }    
+    
+    public void drive( double x, double y, double r, double s, double gyroAngle,
+            double accelX, double accelY, boolean _autoSteer, double _turnSpeed,
+            boolean fieldMove, boolean fieldSteer )
+    {
+//        steerDashboardPID.update();
+
+        turnSpeed = _turnSpeed;
+        autoSteer = _autoSteer;
         saveGyroAngle = gyroAngle;
         SmartDashboard.putNumber("gyroAngle", -gyroAngle);
         GetAccelerationFromJoyStick(x, y);
@@ -117,7 +154,8 @@ public class SwerveDrive extends PIDSubsystem  {
         double turnMag = Math.sqrt( r*r + s*s );
         
         if (!autoSteer) {  // check for HandsOff
-            if (magnitude < 0.1 && turnMag < 0.05 ) {
+            if (magnitude < 0.1 && turnMag < TURN_DEAD_BAND ) {
+                turnSpeedSum = 0.0;
                 if (!handsOffStarted) {
                     handsOffStarted = true;
                     timeHandsOffStarted = Timer.getFPGATimestamp();
@@ -131,7 +169,11 @@ public class SwerveDrive extends PIDSubsystem  {
                     return;
                 }
                 else {
-                    return;
+                    lrVect.SetPower( 0 );
+                    lfVect.SetPower( 0 );
+                    rrVect.SetPower( 0 );
+                    rfVect.SetPower( 0 );
+                    //return;
                 }
             }
             else {
@@ -139,7 +181,7 @@ public class SwerveDrive extends PIDSubsystem  {
             }
         }
         
-        if (turnMag > 0.05 && fieldSteer) {
+        if (turnMag > TURN_DEAD_BAND && fieldSteer) {
             turnJoystickAngle = MathUtils.atan2( -r, s );  // convert the right stick to a goal angle for robot orientation
             SmartDashboard.putNumber("joyStickAngle", -turnJoystickAngle);
             if (!autoSteer) {
@@ -153,7 +195,15 @@ public class SwerveDrive extends PIDSubsystem  {
         }
 
         if (!fieldSteer && !autoSteer) {
-            turnPower = r;  // joystick direct turning
+            turnSpeedPID.setSetpoint(r*r*r*-5.0);  // top speed at 70%, is 6 radians / sec, but it seems to fast
+            turnSpeedPID.enable();
+            SmartDashboard.putNumber("Turn Speed", turnSpeedPID.getError());
+            SmartDashboard.putData("Turn Speed PID", turnSpeedPID);
+            turnSpeedFeed = r*r*r * 5/6; // 1.0 turnPower is too fast.
+            //turnPower = r;
+        }
+        else {
+            turnSpeedPID.disable();            
         }
         
         double tempGyro;

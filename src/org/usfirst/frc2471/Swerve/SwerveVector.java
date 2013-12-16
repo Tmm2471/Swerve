@@ -101,6 +101,11 @@ public class SwerveVector {
         swerve.setSpeed( desiredPower / maxPower );
     }
     
+    public void SetPower( double power )
+    {
+        swerve.setSpeed( power );
+    }
+    
     public void HandsOff()
     {
         swerve.setTwist( handsOffAngle );
