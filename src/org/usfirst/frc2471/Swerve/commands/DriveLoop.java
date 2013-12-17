@@ -50,8 +50,8 @@ public class  DriveLoop extends Command {
         prevAngle = gyroAngle;
 //        SmartDashboard.putNumber("Turn Speed", turnSpeed);
         boolean autoSteer = Robot.oi.autoSteerButton.get();
-        boolean fieldSteer = SmartDashboard.getBoolean("FieldSteer");
-        boolean fieldMove = SmartDashboard.getBoolean("FieldMove");
+        boolean fieldMove = SmartDashboard.getBoolean("FieldMove", true);
+        boolean fieldSteer = SmartDashboard.getBoolean("FieldSteer", false);
         
         RobotMap.swerve.drive(x,y,r,s,gyroAngle,accelX,accelY,autoSteer,turnSpeed, fieldMove, fieldSteer);
 

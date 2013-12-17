@@ -96,7 +96,6 @@ public class RobotMap {
         
         // ********************************************************
         swerve = new SwerveDrive();
-        LiveWindow.addActuator("Steering Controller", "Steer", swerve.getPIDController());
         
         gyro = new Gyro( 1 );
         gyro.reset();
