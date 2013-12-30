@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.I2C;
 public class ArduinoEncoder {
     I2C arduino;
     char c;
+    double distancePerPulse = 1.0;
     public ArduinoEncoder(I2C _arduino, char _c) {
         arduino = _arduino;
         c = _c;
@@ -24,14 +25,22 @@ public class ArduinoEncoder {
     public int get() {
         byte[] inBuff = new byte[4];
         byte[] outBuff = new byte[1];
-        long enc;
+        int enc;
         outBuff[0] = (byte)c;
         arduino.transaction(outBuff, 1, inBuff, 0);        
         arduino.transaction(outBuff, 0, inBuff, 4);
-        enc = ((long)((inBuff[0] & 0xff) << 24));
-        enc = enc | ((long)((inBuff[1] & 0xff) << 16));
-        enc = enc | ((long)((inBuff[2] & 0xff) << 8));
-        enc = enc | ((long)((inBuff[3] & 0xff)));
+        enc = ((int)((inBuff[0] & 0xff) << 24));
+        enc = enc | ((int)((inBuff[1] & 0xff) << 16));
+        enc = enc | ((int)((inBuff[2] & 0xff) << 8));
+        enc = enc | ((int)((inBuff[3] & 0xff)));
         return (int)enc;
+    }
+    
+    public void setDistancePerPulse(double dist) {
+        distancePerPulse = dist;
+    }
+    
+    public double getDistance() {
+        return distancePerPulse * (double) get();
     }
 }

@@ -44,7 +44,7 @@ public class SwerveModule implements Runnable {
         twistController.setInputRange(-Math.PI, Math.PI);
         twistController.setOutputRange(-1.0, 1.0);
         twistController.setContinuous(true);
-        twistController.setPercentTolerance(1.0);  //1=1%  15==15% etc  verified with docs
+        twistController.setPercentTolerance(3.0);  //1=1%  15==15% etc  verified with docs
         
         t = new Thread(this);
         t.start();

@@ -13,9 +13,10 @@ import org.usfirst.frc2471.Swerve.RobotMap;
  */
 public class ResetGyroCommand extends Command {
     
-    public ResetGyroCommand() {
+    public ResetGyroCommand(double startOffset) {
         // Use requires() here to declare subsystem dependencies
         // eg. requires(chassis);
+        RobotMap.swerve.setGyroOffset(startOffset);
     }
 
     // Called just before this Command runs the first time
